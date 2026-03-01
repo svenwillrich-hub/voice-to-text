@@ -353,7 +353,7 @@ body{
 /*═══════════════════════════════════════════════════════════════════════════
   Voice-to-Text — Frontend
 ═══════════════════════════════════════════════════════════════════════════*/
-const API_BASE=(()=>{if(location.port===''||location.port==='80')return'/api';return'http://localhost:8000'})();
+const API_BASE=(()=>{const p=location.port;if(p===''||p==='80'||p==='1234')return'/api';return'http://localhost:8000'})();
 
 // ── State ───────────────────────────────────────────────────────────────
 let hist=[];

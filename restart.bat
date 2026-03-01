@@ -12,7 +12,7 @@ echo ============================================
 echo   Voice-to-Text restarted successfully.
 echo.
 echo   Open in your browser:
-echo   http://localhost
+echo   http://localhost:1234
 echo ============================================
 echo.
 echo Showing container logs (Ctrl+C to exit)...

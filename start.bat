@@ -11,7 +11,7 @@ echo ============================================
 echo   Voice-to-Text is starting...
 echo.
 echo   Open in your browser:
-echo   http://localhost
+echo   http://localhost:1234
 echo.
 echo   API:  http://localhost:8000/health
 echo ============================================
