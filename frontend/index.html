@@ -236,6 +236,65 @@ body{
 .toast.success{border-color:var(--success);color:var(--success)}
 
 /*═══════════════════════════════════════════════════════════════════════════
+  POST-PROCESSING
+═══════════════════════════════════════════════════════════════════════════*/
+.pp-card{position:relative;overflow:hidden}
+.pp-actions{display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:.75rem}
+.pp-btn{
+  display:inline-flex;align-items:center;gap:5px;padding:.45rem .8rem;
+  border:1px solid var(--border);border-radius:var(--rxs);background:var(--bg-input);
+  color:var(--text-sec);font-size:.78rem;font-family:inherit;cursor:pointer;
+  transition:all var(--tr);
+}
+.pp-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-bg)}
+.pp-btn.active{border-color:var(--accent);color:#fff;background:var(--accent)}
+.pp-btn svg{width:14px;height:14px}
+
+.pp-options{margin-bottom:.65rem;animation:fadeUp .3s ease}
+.pp-select{
+  width:100%;padding:.45rem .6rem;border:1px solid var(--border);border-radius:var(--rxs);
+  font-family:inherit;font-size:.82rem;background:var(--bg-input);color:var(--text);
+}
+.pp-select:focus{outline:none;border-color:var(--accent)}
+.pp-textarea{
+  width:100%;min-height:70px;padding:.6rem .7rem;border:1px solid var(--border);border-radius:var(--rxs);
+  font-family:inherit;font-size:.82rem;line-height:1.5;resize:vertical;
+  background:var(--bg-input);color:var(--text);
+}
+.pp-textarea:focus{outline:none;border-color:var(--accent)}
+.pp-textarea::placeholder{color:var(--text-dim)}
+
+.pp-run-btn{
+  display:flex;align-items:center;justify-content:center;gap:.4rem;
+  width:100%;padding:.55rem;border:none;border-radius:var(--rxs);
+  background:linear-gradient(135deg,var(--accent),var(--accent-l));color:#fff;
+  font-family:inherit;font-size:.82rem;font-weight:600;cursor:pointer;
+  transition:transform var(--tr),opacity var(--tr);margin-bottom:.65rem;
+}
+.pp-run-btn:hover{transform:translateY(-1px)}
+.pp-run-btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.pp-spinner{
+  width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;
+  border-radius:50%;animation:spin .6s linear infinite;display:inline-block;
+}
+
+.pp-result{animation:fadeUp .4s ease}
+.pp-result-header{
+  display:flex;align-items:center;justify-content:space-between;margin-bottom:.4rem;
+}
+.pp-result-label{
+  font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;
+  color:var(--accent);display:inline-flex;align-items:center;gap:4px;
+  padding:.2rem .5rem;border-radius:var(--rxs);background:var(--accent-bg);
+}
+.pp-result-text{
+  font-size:.86rem;line-height:1.7;white-space:pre-wrap;color:var(--text);
+  max-height:280px;overflow-y:auto;padding:.6rem .7rem;
+  background:var(--bg-input);border:1px solid var(--border);border-radius:var(--rxs);
+}
+.pp-result-meta{font-size:.68rem;color:var(--text-dim);margin-top:.35rem}
+
+/*═══════════════════════════════════════════════════════════════════════════
   RESPONSIVE
 ═══════════════════════════════════════════════════════════════════════════*/
 @media(max-width:860px){
@@ -324,6 +383,68 @@ body{
         </div>
       </div>
     </div>
+
+    <!-- Post-Processing -->
+    <div class="card pp-card" id="ppCard" style="display:none">
+      <div class="card-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+        Post-Processing
+      </div>
+
+      <!-- Action buttons -->
+      <div class="pp-actions">
+        <button class="pp-btn" data-action="summarize" onclick="ppSelectAction('summarize')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="21" y1="10" x2="7" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="21" y1="18" x2="7" y2="18"/></svg>
+          Summarize
+        </button>
+        <button class="pp-btn" data-action="translate" onclick="ppSelectAction('translate')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 8l4 4-4 4"/><line x1="12" y1="4" x2="12" y2="20" opacity=".3"/><path d="M15 4h2a2 2 0 0 1 2 2v1"/><path d="M15 20h2a2 2 0 0 0 2-2v-1"/></svg>
+          Translate
+        </button>
+        <button class="pp-btn" data-action="optimize" onclick="ppSelectAction('optimize')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          Optimize
+        </button>
+        <button class="pp-btn" data-action="custom" onclick="ppSelectAction('custom')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          Custom Prompt
+        </button>
+      </div>
+
+      <!-- Translate options -->
+      <div class="pp-options" id="ppTranslateOpts" style="display:none">
+        <select class="pp-select" id="ppTargetLang"></select>
+      </div>
+
+      <!-- Custom prompt -->
+      <div class="pp-options" id="ppCustomOpts" style="display:none">
+        <textarea class="pp-textarea" id="ppCustomPrompt" placeholder="Enter your instructions, e.g. 'Rewrite as bullet points' or 'Extract key topics' …"></textarea>
+      </div>
+
+      <!-- Run button -->
+      <button class="pp-run-btn" id="ppRunBtn" onclick="ppRun()" style="display:none">
+        Process
+      </button>
+
+      <!-- Loading -->
+      <div id="ppLoading" style="display:none" class="transcribing-overlay">
+        <span class="spinner"></span>
+        <span id="ppLoadingLabel">Processing …</span>
+      </div>
+
+      <!-- Result -->
+      <div class="pp-result" id="ppResultArea" style="display:none">
+        <div class="pp-result-header">
+          <span class="pp-result-label" id="ppResultLabel"></span>
+          <button class="copy-btn" onclick="ppCopyResult()">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            <span class="copy-label">Copy</span>
+          </button>
+        </div>
+        <div class="pp-result-text" id="ppResultText"></div>
+        <div class="pp-result-meta" id="ppResultMeta"></div>
+      </div>
+    </div>
   </div>
 
   <!-- ═══════════ SIDEBAR — HISTORY ═══════════ -->
@@ -354,6 +475,7 @@ body{
   Voice-to-Text — Frontend
 ═══════════════════════════════════════════════════════════════════════════*/
 const API_BASE=(()=>{const p=location.port;if(p===''||p==='80'||p==='1234')return'/api';return'http://localhost:8000'})();
+const TEXT_API=(()=>{const p=location.port;if(p===''||p==='80'||p==='1234')return'/text-api';return'http://localhost:5000'})();
 
 // ── State ───────────────────────────────────────────────────────────────
 let hist=[];
@@ -492,6 +614,11 @@ function showResult(data){
   }else{$audioPlayer.style.display='none'}
 
   $resultCard.scrollIntoView({behavior:'smooth',block:'nearest'});
+
+  // Show post-processing card
+  $('ppCard').style.display='';
+  $('ppResultArea').style.display='none';
+  $('ppLoading').style.display='none';
 }
 
 // ── Copy ────────────────────────────────────────────────────────────────
@@ -567,6 +694,86 @@ $clearAllBtn.addEventListener('click',()=>{
   $resultCard.style.display='none';renderHistory();
   toast('History cleared','success');
 });
+
+// ── Post-Processing ────────────────────────────────────────────────────
+let ppAction=null;
+let ppLanguages=[];
+let ppLatestResult='';
+
+// Load languages from text-api for the translate dropdown
+async function ppLoadLanguages(){
+  try{
+    const r=await fetch(`${TEXT_API}/languages`);
+    if(!r.ok)return;
+    const d=await r.json();ppLanguages=d.languages;
+    const sel=$('ppTargetLang');
+    sel.innerHTML=ppLanguages.map(l=>`<option value="${l.code}">${l.name}</option>`).join('');
+    sel.value='en';
+  }catch{}
+}
+ppLoadLanguages();
+
+function ppSelectAction(action){
+  ppAction=action;
+  document.querySelectorAll('.pp-btn').forEach(b=>b.classList.toggle('active',b.dataset.action===action));
+  $('ppTranslateOpts').style.display=action==='translate'?'':'none';
+  $('ppCustomOpts').style.display=action==='custom'?'':'none';
+  $('ppRunBtn').style.display='';
+}
+
+async function ppRun(){
+  if(!ppAction||!latestText)return;
+  const runBtn=$('ppRunBtn');
+  runBtn.disabled=true;
+  runBtn.innerHTML='<span class="pp-spinner"></span> Processing …';
+  $('ppLoading').style.display='none';
+  $('ppResultArea').style.display='none';
+
+  try{
+    let result;
+    if(ppAction==='translate'){
+      const tgt=$('ppTargetLang').value;
+      const r=await fetch(`${TEXT_API}/translate`,{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({text:latestText,target_language:tgt})
+      });
+      if(!r.ok){let m=`HTTP ${r.status}`;try{const j=await r.json();m=j.detail||m}catch{}throw new Error(m)}
+      const d=await r.json();
+      result={text:d.translated_text,label:'Translate',meta:`${d.source_language_name} → ${d.target_language_name} · ${d.duration_processing}s`};
+    }else{
+      const body={text:latestText,action:ppAction};
+      if(ppAction==='custom')body.custom_prompt=$('ppCustomPrompt').value;
+      const r=await fetch(`${TEXT_API}/process`,{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify(body)
+      });
+      if(!r.ok){let m=`HTTP ${r.status}`;try{const j=await r.json();m=j.detail||m}catch{}throw new Error(m)}
+      const d=await r.json();
+      const labels={summarize:'Summarize',optimize:'Optimize',custom:'Custom'};
+      result={text:d.result_text,label:labels[ppAction]||ppAction,meta:`${d.duration_processing}s`};
+    }
+
+    ppLatestResult=result.text;
+    $('ppResultLabel').textContent=result.label;
+    $('ppResultText').textContent=result.text;
+    $('ppResultMeta').textContent=result.meta;
+    $('ppResultArea').style.display='';
+    $('ppResultArea').scrollIntoView({behavior:'smooth',block:'nearest'});
+  }catch(e){
+    toast(`Processing error: ${e.message}`);
+  }finally{
+    runBtn.disabled=false;
+    runBtn.innerHTML='Process';
+  }
+}
+
+function ppCopyResult(){
+  navigator.clipboard.writeText(ppLatestResult).then(()=>{
+    toast('Copied to clipboard','success');
+  });
+}
 
 // ── Utilities ───────────────────────────────────────────────────────────
 function uid(){return Math.random().toString(36).slice(2,10)}

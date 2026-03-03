@@ -1,11 +1,15 @@
 ###############################################################################
-# Voice-to-Text — Docker Compose (Development / Local Testing)
+# Voice-to-Text + Text Translator — Docker Compose
 #
 # CPU-only:   docker compose up --build
 # With GPU:   docker compose --profile gpu up --build
 #
-# For single-image deployment, use the root Dockerfile instead:
-#   docker build -t voice-to-text .
+# Services:
+#   - whisper-api:        Transcription backend (faster-whisper)
+#   - ollama:             Local LLM runtime (TranslateGemma + Gemma 3)
+#   - text-api:           Translation & text processing backend
+#   - web-frontend:       Voice-to-Text UI (port 1234)
+#   - web-translator:     Text Translator UI (port 1235)
 ###############################################################################
 
 services:
@@ -54,7 +58,72 @@ services:
     profiles:
       - gpu
 
-  # ── Web Frontend (nginx + reverse proxy) ───────────────────────────────
+  # ── Ollama (Local LLM runtime) ────────────────────────────────────────
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    restart: unless-stopped
+    ports:
+      - "${OLLAMA_PORT:-11434}:11434"
+    volumes:
+      - ollama-models:/root/.ollama
+
+  # ── Ollama — GPU variant (--profile gpu) ───────────────────────────────
+  ollama-gpu:
+    image: ollama/ollama:latest
+    container_name: ollama-gpu
+    restart: unless-stopped
+    ports:
+      - "${OLLAMA_PORT:-11434}:11434"
+    volumes:
+      - ollama-models:/root/.ollama
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    profiles:
+      - gpu
+
+  # ── Text API (Translation + Text Processing via Ollama) ────────────────
+  text-api:
+    build:
+      context: ./text-api
+      dockerfile: Dockerfile
+    container_name: text-api
+    restart: unless-stopped
+    ports:
+      - "${TEXT_API_PORT:-5000}:5000"
+    environment:
+      - OLLAMA_HOST=http://ollama:11434
+      - TRANSLATION_MODEL=${TRANSLATION_MODEL:-translategemma:12b}
+      - PROCESSING_MODEL=${PROCESSING_MODEL:-gemma3:12b}
+      - MAX_TEXT_LENGTH=${MAX_TEXT_LENGTH:-10000}
+    depends_on:
+      - ollama
+
+  # ── Text API — GPU variant (--profile gpu) ─────────────────────────────
+  text-api-gpu:
+    build:
+      context: ./text-api
+      dockerfile: Dockerfile
+    container_name: text-api-gpu
+    restart: unless-stopped
+    ports:
+      - "${TEXT_API_PORT:-5000}:5000"
+    environment:
+      - OLLAMA_HOST=http://ollama-gpu:11434
+      - TRANSLATION_MODEL=${TRANSLATION_MODEL:-translategemma:12b}
+      - PROCESSING_MODEL=${PROCESSING_MODEL:-gemma3:12b}
+      - MAX_TEXT_LENGTH=${MAX_TEXT_LENGTH:-10000}
+    depends_on:
+      - ollama-gpu
+    profiles:
+      - gpu
+
+  # ── Web Frontend — Voice-to-Text (nginx + reverse proxy) ──────────────
   web-frontend:
     build:
       context: ./frontend
@@ -64,6 +133,18 @@ services:
     ports:
       - "${WEB_PORT:-1234}:80"
 
+  # ── Web Translator — Text Translation (nginx + reverse proxy) ─────────
+  web-translator:
+    build:
+      context: ./frontend-translator
+      dockerfile: Dockerfile
+    container_name: web-translator
+    restart: unless-stopped
+    ports:
+      - "${TRANSLATOR_PORT:-1235}:80"
+
 volumes:
   model-cache:
     name: whisper-model-cache
+  ollama-models:
+    name: ollama-model-cache
