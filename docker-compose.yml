@@ -1,5 +1,5 @@
 ###############################################################################
-# Voice-to-Text + Text Translator — Docker Compose
+# LangFlow — Docker Compose
 #
 # CPU-only:   docker compose up --build
 # With GPU:   docker compose --profile gpu up --build
@@ -8,8 +8,7 @@
 #   - whisper-api:        Transcription backend (faster-whisper)
 #   - ollama:             Local LLM runtime (TranslateGemma + Gemma 3)
 #   - text-api:           Translation & text processing backend
-#   - web-frontend:       Voice-to-Text UI (port 1234)
-#   - web-translator:     Text Translator UI (port 1235)
+#   - web-frontend:       LangFlow UI (port 1234)
 ###############################################################################
 
 services:
@@ -123,7 +122,7 @@ services:
     profiles:
       - gpu
 
-  # ── Web Frontend — Voice-to-Text (nginx + reverse proxy) ──────────────
+  # ── Web Frontend — LangFlow UI (nginx + reverse proxy) ────────────────
   web-frontend:
     build:
       context: ./frontend
@@ -132,16 +131,6 @@ services:
     restart: unless-stopped
     ports:
       - "${WEB_PORT:-1234}:80"
-
-  # ── Web Translator — Text Translation (nginx + reverse proxy) ─────────
-  web-translator:
-    build:
-      context: ./frontend-translator
-      dockerfile: Dockerfile
-    container_name: web-translator
-    restart: unless-stopped
-    ports:
-      - "${TRANSLATOR_PORT:-1235}:80"
 
 volumes:
   model-cache:

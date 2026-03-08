@@ -1,12 +1,12 @@
 # ─────────────────────────────────────────────────────────────────────────────
-# Voice-to-Text — All-in-One Docker Image
+# LangFlow — All-in-One Docker Image
 # Combines FastAPI + faster-whisper backend with nginx frontend in one image.
 # Ideal for publishing to GitHub Container Registry (ghcr.io) or Docker Hub.
 #
-# Build:  docker build -t voice-to-text .
-# Run:    docker run -p 80:80 -v whisper-cache:/root/.cache/huggingface voice-to-text
+# Build:  docker build -t langflow .
+# Run:    docker run -p 80:80 -v whisper-cache:/root/.cache/huggingface langflow
 # GPU:    docker run --gpus all -e WHISPER_DEVICE=cuda -e WHISPER_COMPUTE_TYPE=float16 \
-#           -p 80:80 -v whisper-cache:/root/.cache/huggingface voice-to-text
+#           -p 80:80 -v whisper-cache:/root/.cache/huggingface langflow
 # ─────────────────────────────────────────────────────────────────────────────
 
 FROM python:3.11-slim
@@ -27,9 +27,9 @@ COPY whisper-api/main.py .
 # Frontend — static files served by nginx
 COPY frontend/index.html /var/www/html/index.html
 
-# nginx config — serves frontend + reverse-proxies /api/ to uvicorn
+# nginx config — serves frontend + reverse-proxies /api/ to uvicorn and /text-api/ to text-api
 RUN rm -f /etc/nginx/sites-enabled/default
-COPY <<'NGINX' /etc/nginx/sites-enabled/voice-to-text.conf
+COPY <<'NGINX' /etc/nginx/sites-enabled/langflow.conf
 server {
     listen 80;
     server_name _;
@@ -49,11 +49,21 @@ server {
         proxy_read_timeout 600s;
         proxy_send_timeout 600s;
     }
+
+    location /text-api/ {
+        rewrite ^/text-api/(.*) /$1 break;
+        proxy_pass http://127.0.0.1:5000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        client_max_body_size 10m;
+        proxy_read_timeout 300s;
+        proxy_send_timeout 300s;
+    }
 }
 NGINX
 
 # Supervisor config — runs both nginx and uvicorn
-COPY <<'SUPERVISOR' /etc/supervisor/conf.d/voice-to-text.conf
+COPY <<'SUPERVISOR' /etc/supervisor/conf.d/langflow.conf
 [supervisord]
 nodaemon=true
 logfile=/dev/stdout

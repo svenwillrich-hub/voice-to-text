@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Voice-to-Text</title>
+<title>LangFlow</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 /*═══════════════════════════════════════════════════════════════════════════
@@ -32,7 +32,7 @@ body{
   LAYOUT — main left, sidebar right
 ═══════════════════════════════════════════════════════════════════════════*/
 .layout{display:flex;flex:1;min-height:0}
-.main{flex:1;padding:2rem 2.5rem 2rem 2.5rem;overflow-y:auto;max-width:720px;margin:0 auto}
+.main{flex:1;padding:2rem 2.5rem 2rem 2.5rem;overflow-y:auto;max-width:900px;margin:0 auto}
 .sidebar{
   width:var(--sidebar);min-width:var(--sidebar);
   background:var(--bg-card);border-left:1px solid var(--border);
@@ -42,13 +42,41 @@ body{
 /*═══════════════════════════════════════════════════════════════════════════
   HEADER
 ═══════════════════════════════════════════════════════════════════════════*/
-.header{text-align:center;margin-bottom:2rem}
+.header{text-align:center;margin-bottom:1.2rem}
 .header h1{font-size:1.55rem;font-weight:700}
 .header h1 span{
   background:linear-gradient(135deg,var(--accent),var(--accent-l));
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
 }
-.header p{color:var(--text-dim);font-size:.82rem;margin-top:.25rem}
+.header p{color:var(--text-dim);font-size:.82rem;margin-top:.25rem;max-width:480px;margin-left:auto;margin-right:auto}
+
+/*═══════════════════════════════════════════════════════════════════════════
+  TABS
+═══════════════════════════════════════════════════════════════════════════*/
+.tab-bar{
+  display:flex;justify-content:center;gap:.35rem;margin-bottom:1.5rem;
+  background:var(--bg-card);border:1px solid var(--border);border-radius:var(--rs);
+  padding:.3rem;box-shadow:var(--shadow);
+}
+.tab-btn{
+  flex:1;max-width:220px;padding:.55rem 1.2rem;border:none;border-radius:var(--rxs);
+  background:transparent;color:var(--text-sec);font-family:inherit;
+  font-size:.84rem;font-weight:600;cursor:pointer;transition:all var(--tr);
+  display:inline-flex;align-items:center;justify-content:center;gap:.4rem;
+}
+.tab-btn:hover{color:var(--text);background:var(--bg-hover)}
+.tab-btn.active{
+  background:linear-gradient(135deg,var(--accent),var(--accent-l));color:#fff;
+  box-shadow:0 2px 8px rgba(91,76,255,.2);
+}
+.tab-btn svg{width:16px;height:16px}
+
+.tab-content{display:none}
+.tab-content.active{display:block}
+
+/*═══════════════════════════════════════════════════════════════════════════
+  STATUS BADGE
+═══════════════════════════════════════════════════════════════════════════*/
 .status-badge{
   display:inline-flex;align-items:center;gap:6px;margin-top:.6rem;
   padding:.25rem .75rem;border-radius:999px;font-size:.72rem;font-weight:500;
@@ -56,6 +84,7 @@ body{
 }
 .status-dot{width:7px;height:7px;border-radius:50%;background:var(--success);animation:pulse 2s infinite}
 .status-dot.offline{background:var(--danger);animation:none}
+.status-dot.loading{background:orange;animation:pulse 1s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
 
 /*═══════════════════════════════════════════════════════════════════════════
@@ -180,62 +209,6 @@ body{
 .audio-times{display:flex;justify-content:space-between;font-size:.62rem;color:var(--text-dim);font-variant-numeric:tabular-nums}
 
 /*═══════════════════════════════════════════════════════════════════════════
-  SIDEBAR — HISTORY
-═══════════════════════════════════════════════════════════════════════════*/
-.sidebar-header{
-  padding:1rem 1rem .6rem;display:flex;justify-content:space-between;align-items:center;
-  border-bottom:1px solid var(--border);
-}
-.sidebar-header h2{font-size:.8rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--text-dim)}
-.clear-btn{
-  background:none;border:1px solid var(--border);border-radius:var(--rxs);
-  padding:.25rem .5rem;font-size:.68rem;color:var(--text-dim);cursor:pointer;
-  transition:all var(--tr);
-}
-.clear-btn:hover{color:var(--danger);border-color:var(--danger)}
-.history-list{flex:1;overflow-y:auto;padding:.6rem .7rem}
-.history-item{
-  padding:.6rem .7rem;border:1px solid transparent;border-radius:var(--rs);
-  cursor:pointer;transition:all var(--tr);margin-bottom:.35rem;position:relative;
-  animation:slideIn .35s ease;
-}
-@keyframes slideIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
-.history-item:hover{background:var(--bg-hover);border-color:var(--border)}
-.history-item.active{background:var(--accent-bg);border-color:rgba(91,76,255,.18)}
-.history-item .h-name{font-size:.75rem;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:20px}
-.history-item .h-meta{font-size:.65rem;color:var(--text-dim);margin-top:1px}
-.history-item .h-preview{font-size:.72rem;color:var(--text-sec);margin-top:.2rem;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.history-item .h-delete{
-  position:absolute;top:.5rem;right:.5rem;background:none;border:none;cursor:pointer;
-  color:var(--text-dim);opacity:0;transition:opacity var(--tr),color var(--tr);padding:2px;
-}
-.history-item:hover .h-delete{opacity:1}
-.history-item .h-delete:hover{color:var(--danger)}
-.history-item .h-delete svg{width:14px;height:14px}
-.history-empty{text-align:center;color:var(--text-dim);font-size:.78rem;padding:2.5rem .5rem}
-
-/*═══════════════════════════════════════════════════════════════════════════
-  FOOTER
-═══════════════════════════════════════════════════════════════════════════*/
-.footer{
-  text-align:center;padding:.8rem 1rem;font-size:.68rem;color:var(--text-dim);
-  border-top:1px solid var(--border);background:var(--bg-card);
-}
-.footer a{color:var(--accent);text-decoration:none}
-.footer a:hover{text-decoration:underline}
-
-/*═══════════════════════════════════════════════════════════════════════════
-  TOAST
-═══════════════════════════════════════════════════════════════════════════*/
-.toast-container{position:fixed;top:1rem;right:1rem;z-index:9999;display:flex;flex-direction:column;gap:.4rem}
-.toast{
-  background:#fff;border:1px solid var(--danger);color:var(--danger);
-  padding:.6rem .9rem;border-radius:var(--rs);font-size:.78rem;max-width:360px;
-  box-shadow:0 4px 20px rgba(0,0,0,.1);animation:slideIn .3s ease;
-}
-.toast.success{border-color:var(--success);color:var(--success)}
-
-/*═══════════════════════════════════════════════════════════════════════════
   POST-PROCESSING
 ═══════════════════════════════════════════════════════════════════════════*/
 .pp-card{position:relative;overflow:hidden}
@@ -295,13 +268,162 @@ body{
 .pp-result-meta{font-size:.68rem;color:var(--text-dim);margin-top:.35rem}
 
 /*═══════════════════════════════════════════════════════════════════════════
+  TRANSLATION CARD
+═══════════════════════════════════════════════════════════════════════════*/
+.translate-card{
+  background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r);
+  box-shadow:var(--shadow);overflow:hidden;margin-bottom:1rem;
+}
+
+/* Language selectors row */
+.lang-row{
+  display:flex;align-items:center;border-bottom:1px solid var(--border);
+  background:var(--bg-input);
+}
+.lang-select-wrap{flex:1;padding:.6rem .8rem}
+.lang-select-wrap label{font-size:.65rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--text-dim);display:block;margin-bottom:.2rem}
+.lang-select{
+  width:100%;border:1px solid var(--border);border-radius:var(--rxs);
+  padding:.4rem .6rem;font-size:.82rem;font-family:inherit;
+  background:var(--bg-card);color:var(--text);cursor:pointer;
+  transition:border-color var(--tr);
+}
+.lang-select:focus{outline:none;border-color:var(--accent)}
+.swap-btn{
+  width:36px;height:36px;border-radius:50%;border:1px solid var(--border);
+  background:var(--bg-card);color:var(--text-dim);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  transition:all var(--tr);
+}
+.swap-btn:hover{border-color:var(--accent);color:var(--accent);transform:rotate(180deg)}
+.swap-btn svg{width:16px;height:16px}
+
+/* Text panels */
+.text-panels{display:grid;grid-template-columns:1fr 1fr;min-height:220px}
+.text-panel{display:flex;flex-direction:column;padding:0}
+.text-panel:first-child{border-right:1px solid var(--border)}
+.text-panel textarea{
+  flex:1;width:100%;border:none;resize:none;padding:.9rem 1rem;
+  font-family:inherit;font-size:.88rem;line-height:1.7;
+  background:transparent;color:var(--text);outline:none;min-height:180px;
+}
+.text-panel textarea::placeholder{color:var(--text-dim)}
+.text-panel .result-area{
+  flex:1;padding:.9rem 1rem;font-size:.88rem;line-height:1.7;
+  color:var(--text);white-space:pre-wrap;overflow-y:auto;min-height:180px;
+}
+.text-panel .result-area.empty{color:var(--text-dim);font-style:italic}
+
+/* Panel footer */
+.panel-footer{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:.4rem .8rem;border-top:1px solid var(--border);font-size:.68rem;color:var(--text-dim);
+  min-height:36px;
+}
+.char-count{font-variant-numeric:tabular-nums}
+.detected-lang{
+  display:inline-flex;align-items:center;gap:4px;
+  padding:.15rem .45rem;border-radius:var(--rxs);
+  background:var(--accent-bg);color:var(--accent);font-size:.68rem;font-weight:500;
+}
+
+/*═══════════════════════════════════════════════════════════════════════════
+  TRANSLATE BUTTON
+═══════════════════════════════════════════════════════════════════════════*/
+.translate-btn{
+  display:flex;align-items:center;justify-content:center;gap:.5rem;
+  width:100%;padding:.7rem;border:none;border-radius:var(--rs);
+  background:linear-gradient(135deg,var(--accent),var(--accent-l));color:#fff;
+  font-family:inherit;font-size:.88rem;font-weight:600;cursor:pointer;
+  box-shadow:0 4px 14px rgba(91,76,255,.2);
+  transition:transform var(--tr),box-shadow var(--tr),opacity var(--tr);
+}
+.translate-btn:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(91,76,255,.3)}
+.translate-btn:active{transform:translateY(0)}
+.translate-btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.translate-btn svg{width:18px;height:18px}
+
+/* Loading spinner inside button */
+.btn-spinner{
+  width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;
+  border-radius:50%;animation:spin .6s linear infinite;
+}
+
+/* Meta bar */
+.meta-bar{
+  display:flex;flex-wrap:wrap;gap:.3rem .7rem;font-size:.68rem;color:var(--text-dim);
+  margin-top:.5rem;
+}
+.meta-bar span{display:inline-flex;align-items:center;gap:3px}
+
+/*═══════════════════════════════════════════════════════════════════════════
+  SIDEBAR — HISTORY
+═══════════════════════════════════════════════════════════════════════════*/
+.sidebar-header{
+  padding:1rem 1rem .6rem;display:flex;justify-content:space-between;align-items:center;
+  border-bottom:1px solid var(--border);
+}
+.sidebar-header h2{font-size:.8rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--text-dim)}
+.clear-btn{
+  background:none;border:1px solid var(--border);border-radius:var(--rxs);
+  padding:.25rem .5rem;font-size:.68rem;color:var(--text-dim);cursor:pointer;
+  transition:all var(--tr);
+}
+.clear-btn:hover{color:var(--danger);border-color:var(--danger)}
+.history-list{flex:1;overflow-y:auto;padding:.6rem .7rem}
+.history-item{
+  padding:.6rem .7rem;border:1px solid transparent;border-radius:var(--rs);
+  cursor:pointer;transition:all var(--tr);margin-bottom:.35rem;position:relative;
+  animation:slideIn .35s ease;
+}
+@keyframes slideIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
+.history-item:hover{background:var(--bg-hover);border-color:var(--border)}
+.history-item.active{background:var(--accent-bg);border-color:rgba(91,76,255,.18)}
+.history-item .h-name{font-size:.75rem;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:20px}
+.history-item .h-meta{font-size:.65rem;color:var(--text-dim);margin-top:1px}
+.history-item .h-preview{font-size:.72rem;color:var(--text-sec);margin-top:.2rem;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.history-item .h-delete{
+  position:absolute;top:.5rem;right:.5rem;background:none;border:none;cursor:pointer;
+  color:var(--text-dim);opacity:0;transition:opacity var(--tr),color var(--tr);padding:2px;
+}
+.history-item:hover .h-delete{opacity:1}
+.history-item .h-delete:hover{color:var(--danger)}
+.history-item .h-delete svg{width:14px;height:14px}
+.history-empty{text-align:center;color:var(--text-dim);font-size:.78rem;padding:2.5rem .5rem}
+
+/*═══════════════════════════════════════════════════════════════════════════
+  FOOTER
+═══════════════════════════════════════════════════════════════════════════*/
+.footer{
+  text-align:center;padding:.8rem 1rem;font-size:.68rem;color:var(--text-dim);
+  border-top:1px solid var(--border);background:var(--bg-card);
+}
+.footer a{color:var(--accent);text-decoration:none}
+.footer a:hover{text-decoration:underline}
+
+/*═══════════════════════════════════════════════════════════════════════════
+  TOAST
+═══════════════════════════════════════════════════════════════════════════*/
+.toast-container{position:fixed;top:1rem;right:1rem;z-index:9999;display:flex;flex-direction:column;gap:.4rem}
+.toast{
+  background:#fff;border:1px solid var(--danger);color:var(--danger);
+  padding:.6rem .9rem;border-radius:var(--rs);font-size:.78rem;max-width:360px;
+  box-shadow:0 4px 20px rgba(0,0,0,.1);animation:slideIn .3s ease;
+}
+.toast.success{border-color:var(--success);color:var(--success)}
+
+/*═══════════════════════════════════════════════════════════════════════════
   RESPONSIVE
 ═══════════════════════════════════════════════════════════════════════════*/
-@media(max-width:860px){
+@media(max-width:960px){
   .layout{flex-direction:column}
   .sidebar{width:100%;min-width:unset;border-left:none;border-top:1px solid var(--border);max-height:300px}
   .main{padding:1.25rem 1rem;max-width:100%}
-  --sidebar:100%;
+}
+@media(max-width:640px){
+  .text-panels{grid-template-columns:1fr}
+  .text-panel:first-child{border-right:none;border-bottom:1px solid var(--border)}
+  .text-panel textarea,.text-panel .result-area{min-height:140px}
 }
 @media(max-width:500px){
   .mic-btn{width:64px;height:64px}
@@ -315,135 +437,209 @@ body{
   <!-- ═══════════ MAIN AREA ═══════════ -->
   <div class="main">
     <header class="header">
-      <h1><span>Voice-to-Text</span></h1>
-      <p>Self-hosted transcription · No data leaves your server · Fully offline</p>
-      <div class="status-badge" id="statusBadge">
-        <span class="status-dot" id="statusDot"></span>
-        <span id="statusText">Connecting …</span>
-      </div>
+      <h1><span>LangFlow</span></h1>
+      <p>Transform language, any direction. Transcribe speech to text and translate between languages &mdash; all in one place.</p>
     </header>
 
-    <!-- Microphone -->
-    <div class="card mic-section">
-      <div class="card-title">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
-        Record
-      </div>
-      <button class="mic-btn" id="micBtn" title="Start / stop recording">
-        <svg id="micIcon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2" fill="none" stroke="currentColor" stroke-width="2"/><line x1="12" y1="19" x2="12" y2="23" stroke="currentColor" stroke-width="2"/></svg>
+    <!-- Tab Bar -->
+    <div class="tab-bar">
+      <button class="tab-btn active" data-tab="transcribe" onclick="switchTab('transcribe')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg>
+        Transcribe
       </button>
-      <span class="mic-label" id="micLabel">Click to record</span>
-      <div class="rec-timer" id="recTimer">00:00</div>
+      <button class="tab-btn" data-tab="translate" onclick="switchTab('translate')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 8l4 4-4 4"/><line x1="12" y1="4" x2="12" y2="20" opacity=".3"/><path d="M15 4h2a2 2 0 0 1 2 2v1"/><path d="M15 20h2a2 2 0 0 0 2-2v-1"/></svg>
+        Translate
+      </button>
     </div>
 
-    <!-- Upload -->
-    <div class="card">
-      <div class="card-title">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-        Upload
+    <!-- ═══════════ TRANSCRIBE TAB ═══════════ -->
+    <div class="tab-content active" id="tabTranscribe">
+      <div class="status-badge" id="whisperStatus">
+        <span class="status-dot" id="whisperDot"></span>
+        <span id="whisperText">Connecting &hellip;</span>
       </div>
-      <div class="drop-zone" id="dropZone">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-        <p>Drop files here or <strong>click to browse</strong></p>
-        <span class="formats">MP3 · WAV · OGG · M4A · OPUS · AAC · FLAC · WebM</span>
-      </div>
-      <input type="file" class="file-input" id="fileInput" multiple
-             accept=".mp3,.wav,.ogg,.m4a,.opus,.aac,.flac,.wma,.webm,.mp4">
-    </div>
 
-    <!-- Result (merged queue + result) -->
-    <div class="card result-card" id="resultCard" style="display:none">
-      <div class="progress-bar" id="progressBar"></div>
-      <div id="transcribingState" style="display:none">
-        <div class="transcribing-overlay">
-          <span class="spinner"></span>
-          <span id="transcribingLabel">Transcribing…</span>
+      <!-- Microphone -->
+      <div class="card mic-section" style="margin-top:.8rem">
+        <div class="card-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+          Record
         </div>
+        <button class="mic-btn" id="micBtn" title="Start / stop recording">
+          <svg id="micIcon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2" fill="none" stroke="currentColor" stroke-width="2"/><line x1="12" y1="19" x2="12" y2="23" stroke="currentColor" stroke-width="2"/></svg>
+        </button>
+        <span class="mic-label" id="micLabel">Click to record</span>
+        <div class="rec-timer" id="recTimer">00:00</div>
       </div>
-      <div id="resultContent" style="display:none">
-        <!-- Audio Player -->
-        <div class="audio-player" id="audioPlayer">
-          <button class="play-btn" id="playBtn" title="Play / Pause">
-            <svg id="playIcon" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-          </button>
-          <div class="audio-wrap">
-            <div class="audio-name" id="audioName"></div>
-            <div class="audio-bar-c" id="audioBarC"><div class="audio-bar" id="audioBar"></div></div>
-            <div class="audio-times"><span id="audioCur">0:00</span><span id="audioDur">0:00</span></div>
+
+      <!-- Upload -->
+      <div class="card">
+        <div class="card-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          Upload
+        </div>
+        <div class="drop-zone" id="dropZone">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          <p>Drop files here or <strong>click to browse</strong></p>
+          <span class="formats">MP3 &middot; WAV &middot; OGG &middot; M4A &middot; OPUS &middot; AAC &middot; FLAC &middot; WebM</span>
+        </div>
+        <input type="file" class="file-input" id="fileInput" multiple
+               accept=".mp3,.wav,.ogg,.m4a,.opus,.aac,.flac,.wma,.webm,.mp4">
+      </div>
+
+      <!-- Result (merged queue + result) -->
+      <div class="card result-card" id="resultCard" style="display:none">
+        <div class="progress-bar" id="progressBar"></div>
+        <div id="transcribingState" style="display:none">
+          <div class="transcribing-overlay">
+            <span class="spinner"></span>
+            <span id="transcribingLabel">Transcribing&hellip;</span>
           </div>
         </div>
-        <!-- Text -->
-        <div>
-          <button class="copy-btn" id="copyBtn" onclick="copyResult()">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-            <span class="copy-label">Copy</span>
+        <div id="resultContent" style="display:none">
+          <!-- Audio Player -->
+          <div class="audio-player" id="audioPlayer">
+            <button class="play-btn" id="playBtn" title="Play / Pause">
+              <svg id="playIcon" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            </button>
+            <div class="audio-wrap">
+              <div class="audio-name" id="audioName"></div>
+              <div class="audio-bar-c" id="audioBarC"><div class="audio-bar" id="audioBar"></div></div>
+              <div class="audio-times"><span id="audioCur">0:00</span><span id="audioDur">0:00</span></div>
+            </div>
+          </div>
+          <!-- Text -->
+          <div>
+            <button class="copy-btn" id="copyBtn" onclick="copyResult()">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              <span class="copy-label">Copy</span>
+            </button>
+            <div class="result-text" id="resultText"></div>
+            <div class="result-meta" id="resultMeta"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Post-Processing -->
+      <div class="card pp-card" id="ppCard" style="display:none">
+        <div class="card-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+          Post-Processing
+        </div>
+
+        <!-- Action buttons -->
+        <div class="pp-actions">
+          <button class="pp-btn" data-action="summarize" onclick="ppSelectAction('summarize')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="21" y1="10" x2="7" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="21" y1="18" x2="7" y2="18"/></svg>
+            Summarize
           </button>
-          <div class="result-text" id="resultText"></div>
-          <div class="result-meta" id="resultMeta"></div>
+          <button class="pp-btn" data-action="translate" onclick="ppSelectAction('translate')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 8l4 4-4 4"/><line x1="12" y1="4" x2="12" y2="20" opacity=".3"/><path d="M15 4h2a2 2 0 0 1 2 2v1"/><path d="M15 20h2a2 2 0 0 0 2-2v-1"/></svg>
+            Translate
+          </button>
+          <button class="pp-btn" data-action="optimize" onclick="ppSelectAction('optimize')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            Optimize
+          </button>
+          <button class="pp-btn" data-action="custom" onclick="ppSelectAction('custom')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            Custom Prompt
+          </button>
+        </div>
+
+        <!-- Translate options -->
+        <div class="pp-options" id="ppTranslateOpts" style="display:none">
+          <select class="pp-select" id="ppTargetLang"></select>
+        </div>
+
+        <!-- Custom prompt -->
+        <div class="pp-options" id="ppCustomOpts" style="display:none">
+          <textarea class="pp-textarea" id="ppCustomPrompt" placeholder="Enter your instructions, e.g. 'Rewrite as bullet points' or 'Extract key topics' &hellip;"></textarea>
+        </div>
+
+        <!-- Run button -->
+        <button class="pp-run-btn" id="ppRunBtn" onclick="ppRun()" style="display:none">
+          Process
+        </button>
+
+        <!-- Loading -->
+        <div id="ppLoading" style="display:none" class="transcribing-overlay">
+          <span class="spinner"></span>
+          <span id="ppLoadingLabel">Processing &hellip;</span>
+        </div>
+
+        <!-- Result -->
+        <div class="pp-result" id="ppResultArea" style="display:none">
+          <div class="pp-result-header">
+            <span class="pp-result-label" id="ppResultLabel"></span>
+            <button class="copy-btn" onclick="ppCopyResult()">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              <span class="copy-label">Copy</span>
+            </button>
+          </div>
+          <div class="pp-result-text" id="ppResultText"></div>
+          <div class="pp-result-meta" id="ppResultMeta"></div>
         </div>
       </div>
     </div>
 
-    <!-- Post-Processing -->
-    <div class="card pp-card" id="ppCard" style="display:none">
-      <div class="card-title">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-        Post-Processing
+    <!-- ═══════════ TRANSLATE TAB ═══════════ -->
+    <div class="tab-content" id="tabTranslate">
+      <div class="status-badge" id="textStatus">
+        <span class="status-dot" id="textDot"></span>
+        <span id="textStatusText">Connecting &hellip;</span>
       </div>
 
-      <!-- Action buttons -->
-      <div class="pp-actions">
-        <button class="pp-btn" data-action="summarize" onclick="ppSelectAction('summarize')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="21" y1="10" x2="7" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="21" y1="18" x2="7" y2="18"/></svg>
-          Summarize
-        </button>
-        <button class="pp-btn" data-action="translate" onclick="ppSelectAction('translate')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 8l4 4-4 4"/><line x1="12" y1="4" x2="12" y2="20" opacity=".3"/><path d="M15 4h2a2 2 0 0 1 2 2v1"/><path d="M15 20h2a2 2 0 0 0 2-2v-1"/></svg>
-          Translate
-        </button>
-        <button class="pp-btn" data-action="optimize" onclick="ppSelectAction('optimize')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-          Optimize
-        </button>
-        <button class="pp-btn" data-action="custom" onclick="ppSelectAction('custom')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-          Custom Prompt
-        </button>
+      <!-- Translation Card -->
+      <div class="translate-card" style="margin-top:.8rem">
+        <!-- Language Row -->
+        <div class="lang-row">
+          <div class="lang-select-wrap">
+            <label for="srcLang">Source</label>
+            <select class="lang-select" id="srcLang">
+              <option value="auto" selected>Auto-detect</option>
+            </select>
+          </div>
+          <button class="swap-btn" id="swapBtn" title="Swap languages">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 16l-4-4m0 0l4-4m-4 4h18"/><path d="M17 8l4 4m0 0l-4 4m4-4H3" opacity=".4"/></svg>
+          </button>
+          <div class="lang-select-wrap">
+            <label for="tgtLang">Target</label>
+            <select class="lang-select" id="tgtLang"></select>
+          </div>
+        </div>
+
+        <!-- Text Panels -->
+        <div class="text-panels">
+          <div class="text-panel">
+            <textarea id="srcText" placeholder="Type or paste text to translate &hellip;" spellcheck="false"></textarea>
+            <div class="panel-footer">
+              <span class="char-count" id="charCount">0 / 10,000</span>
+              <span class="detected-lang" id="detectedLang" style="display:none"></span>
+            </div>
+          </div>
+          <div class="text-panel">
+            <div class="result-area empty" id="tgtResult">Translation will appear here</div>
+            <div class="panel-footer">
+              <span id="tlResultMeta"></span>
+              <button class="copy-btn" id="tlCopyBtn" style="display:none">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                <span class="copy-label">Copy</span>
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <!-- Translate options -->
-      <div class="pp-options" id="ppTranslateOpts" style="display:none">
-        <select class="pp-select" id="ppTargetLang"></select>
-      </div>
-
-      <!-- Custom prompt -->
-      <div class="pp-options" id="ppCustomOpts" style="display:none">
-        <textarea class="pp-textarea" id="ppCustomPrompt" placeholder="Enter your instructions, e.g. 'Rewrite as bullet points' or 'Extract key topics' …"></textarea>
-      </div>
-
-      <!-- Run button -->
-      <button class="pp-run-btn" id="ppRunBtn" onclick="ppRun()" style="display:none">
-        Process
+      <!-- Translate Button -->
+      <button class="translate-btn" id="translateBtn" disabled>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 8l4 4-4 4"/><line x1="12" y1="4" x2="12" y2="20" opacity=".3"/><path d="M15 4h2a2 2 0 0 1 2 2v1"/><path d="M15 20h2a2 2 0 0 0 2-2v-1"/></svg>
+        Translate
       </button>
 
-      <!-- Loading -->
-      <div id="ppLoading" style="display:none" class="transcribing-overlay">
-        <span class="spinner"></span>
-        <span id="ppLoadingLabel">Processing …</span>
-      </div>
-
-      <!-- Result -->
-      <div class="pp-result" id="ppResultArea" style="display:none">
-        <div class="pp-result-header">
-          <span class="pp-result-label" id="ppResultLabel"></span>
-          <button class="copy-btn" onclick="ppCopyResult()">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-            <span class="copy-label">Copy</span>
-          </button>
-        </div>
-        <div class="pp-result-text" id="ppResultText"></div>
-        <div class="pp-result-meta" id="ppResultMeta"></div>
-      </div>
+      <!-- Meta bar -->
+      <div class="meta-bar" id="metaBar"></div>
     </div>
   </div>
 
@@ -454,14 +650,14 @@ body{
       <button class="clear-btn" id="clearAllBtn" title="Delete all">Clear all</button>
     </div>
     <div class="history-list" id="historyList">
-      <div class="history-empty" id="historyEmpty">No transcriptions yet.</div>
+      <div class="history-empty" id="historyEmpty">No entries yet.</div>
     </div>
   </aside>
 </div>
 
 <!-- Footer -->
 <footer class="footer">
-  Provided by <strong>Dr. Sven-Erik Willrich</strong> · <a href="mailto:mail@svenwillrich.de">mail@svenwillrich.de</a>
+  Provided by <strong>Dr. Sven-Erik Willrich</strong> &middot; <a href="mailto:mail@svenwillrich.de">mail@svenwillrich.de</a>
 </footer>
 
 <!-- Hidden audio element -->
@@ -472,48 +668,107 @@ body{
 
 <script>
 /*═══════════════════════════════════════════════════════════════════════════
-  Voice-to-Text — Frontend
+  LangFlow — Unified Frontend
 ═══════════════════════════════════════════════════════════════════════════*/
-const API_BASE=(()=>{const p=location.port;if(p===''||p==='80'||p==='1234')return'/api';return'http://localhost:8000'})();
+const WHISPER_API=(()=>{const p=location.port;if(p===''||p==='80'||p==='1234')return'/api';return'http://localhost:8000'})();
 const TEXT_API=(()=>{const p=location.port;if(p===''||p==='80'||p==='1234')return'/text-api';return'http://localhost:5000'})();
+const MAX_CHARS=10000;
 
-// ── State ───────────────────────────────────────────────────────────────
-let hist=[];
-let activeIdx=-1;
+// ── Shared State ─────────────────────────────────────────────────────────
+let activeTab='transcribe';
+
+// ── Transcribe State ─────────────────────────────────────────────────────
+let trHist=[];
+let trActiveIdx=-1;
 let isRecording=false,mediaRecorder=null,recordedChunks=[],recInterval=null,recStartTime=0;
 let currentAudioUrl=null,latestText='';
 
-// ── DOM ─────────────────────────────────────────────────────────────────
+// ── Translate State ──────────────────────────────────────────────────────
+let tlHist=[];
+let tlActiveIdx=-1;
+let tlLanguages=[];
+let isTranslating=false;
+let detectTimer=null;
+let lastTranslatedText='';
+
+// ── DOM ──────────────────────────────────────────────────────────────────
 const $=id=>document.getElementById(id);
-const $statusDot=$('statusDot'),$statusText=$('statusText'),$micBtn=$('micBtn'),
+
+// Transcribe DOM
+const $whisperDot=$('whisperDot'),$whisperText=$('whisperText'),$micBtn=$('micBtn'),
   $micLabel=$('micLabel'),$recTimer=$('recTimer'),$dropZone=$('dropZone'),
   $fileInput=$('fileInput'),$resultCard=$('resultCard'),$progressBar=$('progressBar'),
   $transcribing=$('transcribingState'),$transcribingLabel=$('transcribingLabel'),
   $resultContent=$('resultContent'),$resultText=$('resultText'),$resultMeta=$('resultMeta'),
   $audioPlayer=$('audioPlayer'),$audioName=$('audioName'),$playBtn=$('playBtn'),
   $playIcon=$('playIcon'),$audioBar=$('audioBar'),$audioBarC=$('audioBarC'),
-  $audioCur=$('audioCur'),$audioDur=$('audioDur'),$audioEl=$('audioEl'),
-  $historyList=$('historyList'),$historyEmpty=$('historyEmpty'),$clearAllBtn=$('clearAllBtn'),
-  $toasts=$('toasts');
+  $audioCur=$('audioCur'),$audioDur=$('audioDur'),$audioEl=$('audioEl');
 
-// ── Health ──────────────────────────────────────────────────────────────
-async function checkHealth(){
-  try{
-    const r=await fetch(`${API_BASE}/health`,{signal:AbortSignal.timeout(5000)});
-    if(!r.ok)throw 0;const d=await r.json();
-    $statusDot.classList.remove('offline');
-    $statusText.textContent=`${d.model} · ${d.device.toUpperCase()} · Ready`;
-  }catch{$statusDot.classList.add('offline');$statusText.textContent='Server unreachable'}
+// Translate DOM
+const $textDot=$('textDot'),$textStatusText=$('textStatusText'),
+  $srcLang=$('srcLang'),$tgtLang=$('tgtLang'),$srcText=$('srcText'),
+  $tgtResult=$('tgtResult'),$translateBtn=$('translateBtn'),
+  $charCount=$('charCount'),$detectedLang=$('detectedLang'),
+  $tlCopyBtn=$('tlCopyBtn'),$metaBar=$('metaBar'),$swapBtn=$('swapBtn'),
+  $tlResultMeta=$('tlResultMeta');
+
+// Shared DOM
+const $historyList=$('historyList'),$historyEmpty=$('historyEmpty'),
+  $clearAllBtn=$('clearAllBtn'),$toasts=$('toasts');
+
+// ══════════════════════════════════════════════════════════════════════════
+//  TAB SWITCHING
+// ══════════════════════════════════════════════════════════════════════════
+function switchTab(tab){
+  activeTab=tab;
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));
+  document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
+  $(tab==='transcribe'?'tabTranscribe':'tabTranslate').classList.add('active');
+  renderHistory();
 }
-checkHealth();setInterval(checkHealth,15000);
 
-// ── Toast ───────────────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════════════
+//  TOAST
+// ══════════════════════════════════════════════════════════════════════════
 function toast(msg,type='error'){
   const el=document.createElement('div');el.className=`toast${type==='success'?' success':''}`;
   el.textContent=msg;$toasts.appendChild(el);setTimeout(()=>el.remove(),5000);
 }
 
-// ── Microphone ──────────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════════════
+//  HEALTH CHECKS
+// ══════════════════════════════════════════════════════════════════════════
+async function checkWhisperHealth(){
+  try{
+    const r=await fetch(`${WHISPER_API}/health`,{signal:AbortSignal.timeout(5000)});
+    if(!r.ok)throw 0;const d=await r.json();
+    $whisperDot.classList.remove('offline');
+    $whisperText.textContent=`${d.model} \u00b7 ${d.device.toUpperCase()} \u00b7 Ready`;
+  }catch{$whisperDot.classList.add('offline');$whisperText.textContent='Server unreachable'}
+}
+
+async function checkTextHealth(){
+  try{
+    const r=await fetch(`${TEXT_API}/health`,{signal:AbortSignal.timeout(5000)});
+    if(!r.ok)throw 0;const d=await r.json();
+    if(d.status==='ok'){
+      $textDot.className='status-dot';
+      $textStatusText.textContent=`${d.translation_model} \u00b7 Ollama \u00b7 Ready`;
+    }else{
+      $textDot.className='status-dot loading';
+      let msg='Loading models';
+      if(!d.translation_model_ready)msg+=` \u00b7 Pulling ${d.translation_model}`;
+      $textStatusText.textContent=msg+' \u2026';
+    }
+  }catch{$textDot.className='status-dot offline';$textStatusText.textContent='Server unreachable'}
+}
+
+checkWhisperHealth();setInterval(checkWhisperHealth,15000);
+checkTextHealth();setInterval(checkTextHealth,10000);
+
+// ══════════════════════════════════════════════════════════════════════════
+//  TRANSCRIBE — MICROPHONE
+// ══════════════════════════════════════════════════════════════════════════
 $micBtn.addEventListener('click',()=>isRecording?stopRec():startRec());
 
 async function startRec(){
@@ -528,7 +783,7 @@ async function startRec(){
       processFiles([new File([blob],`recording_${ts()}.webm`,{type:mime})]);
     };
     mediaRecorder.start(250);isRecording=true;
-    $micBtn.classList.add('recording');$micLabel.textContent='Recording — click to stop';
+    $micBtn.classList.add('recording');$micLabel.textContent='Recording \u2014 click to stop';
     recStartTime=Date.now();$recTimer.classList.add('visible');
     recInterval=setInterval(()=>{
       const s=Math.floor((Date.now()-recStartTime)/1000);
@@ -544,21 +799,20 @@ function stopRec(){
   clearInterval(recInterval);
 }
 
-// ── Drag & Drop ─────────────────────────────────────────────────────────
+// ── Drag & Drop ──────────────────────────────────────────────────────────
 $dropZone.addEventListener('click',()=>$fileInput.click());
 $fileInput.addEventListener('change',()=>{if($fileInput.files.length)processFiles([...$fileInput.files]);$fileInput.value=''});
 ['dragenter','dragover'].forEach(ev=>$dropZone.addEventListener(ev,e=>{e.preventDefault();$dropZone.classList.add('dragover')}));
 ['dragleave','drop'].forEach(ev=>$dropZone.addEventListener(ev,e=>{e.preventDefault();$dropZone.classList.remove('dragover')}));
 $dropZone.addEventListener('drop',e=>{const f=[...e.dataTransfer.files];if(f.length)processFiles(f)});
 
-// ── Transcription ───────────────────────────────────────────────────────
+// ── Transcription ────────────────────────────────────────────────────────
 async function processFiles(files){
   for(const file of files){
-    // Show loading state
     $resultCard.style.display='';
     $transcribing.style.display='';
     $resultContent.style.display='none';
-    $transcribingLabel.textContent=`Transcribing "${file.name}" …`;
+    $transcribingLabel.textContent=`Transcribing "${file.name}" \u2026`;
     $progressBar.className='progress-bar indeterminate';
     $progressBar.style.width='';
 
@@ -567,11 +821,9 @@ async function processFiles(files){
       result._audioUrl=URL.createObjectURL(file);
       result._fileName=file.name;
 
-      // Done — animate progress
       $progressBar.className='progress-bar done';
 
-      // Add to history and show
-      hist.unshift(result);activeIdx=0;
+      trHist.unshift(result);trActiveIdx=0;
       renderHistory();
       showResult(result);
     }catch(err){
@@ -586,25 +838,24 @@ async function processFiles(files){
 
 async function transcribe(file){
   const form=new FormData();form.append('file',file);
-  const res=await fetch(`${API_BASE}/transcribe`,{method:'POST',body:form});
+  const res=await fetch(`${WHISPER_API}/transcribe`,{method:'POST',body:form});
   if(!res.ok){let d=`HTTP ${res.status}`;try{const j=await res.json();d=j.detail||d}catch{}throw new Error(d)}
   return res.json();
 }
 
-// ── Result Display ──────────────────────────────────────────────────────
+// ── Result Display ───────────────────────────────────────────────────────
 function showResult(data){
   latestText=data.text||'(No text recognized)';
   $transcribing.style.display='none';
   $resultContent.style.display='';
   $resultText.textContent=latestText;
   $resultMeta.innerHTML=[
-    `<span>🌐 ${data.language?.toUpperCase()||'?'} (${Math.round((data.language_probability||0)*100)}%)</span>`,
-    `<span>⏱ ${fmtDur(data.duration_audio)}</span>`,
-    `<span>⚡ ${data.duration_processing?.toFixed(1)}s</span>`,
-    `<span>📄 ${data.segments?.length||0} segments</span>`,
+    `<span>\ud83c\udf10 ${data.language?.toUpperCase()||'?'} (${Math.round((data.language_probability||0)*100)}%)</span>`,
+    `<span>\u23f1 ${fmtDur(data.duration_audio)}</span>`,
+    `<span>\u26a1 ${data.duration_processing?.toFixed(1)}s</span>`,
+    `<span>\ud83d\udcc4 ${data.segments?.length||0} segments</span>`,
   ].join('');
 
-  // Audio player
   if(data._audioUrl){
     $audioEl.src=data._audioUrl;$audioEl.load();
     $audioName.textContent=data._fileName||data.filename||'Audio';
@@ -615,13 +866,12 @@ function showResult(data){
 
   $resultCard.scrollIntoView({behavior:'smooth',block:'nearest'});
 
-  // Show post-processing card
   $('ppCard').style.display='';
   $('ppResultArea').style.display='none';
   $('ppLoading').style.display='none';
 }
 
-// ── Copy ────────────────────────────────────────────────────────────────
+// ── Copy ─────────────────────────────────────────────────────────────────
 function copyResult(){
   navigator.clipboard.writeText(latestText).then(()=>{
     const b=$('copyBtn'),l=b.querySelector('.copy-label');
@@ -630,7 +880,7 @@ function copyResult(){
   });
 }
 
-// ── Audio Player ────────────────────────────────────────────────────────
+// ── Audio Player ─────────────────────────────────────────────────────────
 const SVG_PLAY='<polygon points="5 3 19 12 5 21 5 3"/>',
       SVG_PAUSE='<rect x="5" y="3" width="4" height="18"/><rect x="15" y="3" width="4" height="18"/>';
 
@@ -652,55 +902,11 @@ $audioBarC.addEventListener('click',e=>{
   $audioEl.currentTime=((e.clientX-r.left)/r.width)*$audioEl.duration;
 });
 
-// ── History ─────────────────────────────────────────────────────────────
-function renderHistory(){
-  if(!hist.length){$historyEmpty.style.display='';$historyList.innerHTML='';$historyList.appendChild($historyEmpty);return}
-  $historyEmpty.style.display='none';
-  $historyList.innerHTML=hist.map((h,i)=>`
-    <div class="history-item${i===activeIdx?' active':''}" onclick="selectHistory(${i})">
-      <button class="h-delete" onclick="event.stopPropagation();deleteHistory(${i})" title="Delete">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      </button>
-      <div class="h-name">${esc(h._fileName||h.filename||'Recording')}</div>
-      <div class="h-meta">${h.language?.toUpperCase()||''} · ${fmtDur(h.duration_audio)} · ${h.duration_processing?.toFixed(1)}s</div>
-      <div class="h-preview">${esc(h.text||'')}</div>
-    </div>
-  `).join('');
-}
-
-function selectHistory(idx){
-  $audioEl.pause();activeIdx=idx;
-  $resultCard.style.display='';$transcribing.style.display='none';
-  $progressBar.className='progress-bar';$progressBar.style.width='0';
-  showResult(hist[idx]);renderHistory();
-}
-
-function deleteHistory(idx){
-  // Revoke blob URL to free memory
-  if(hist[idx]._audioUrl)URL.revokeObjectURL(hist[idx]._audioUrl);
-  hist.splice(idx,1);
-  if(activeIdx===idx){
-    activeIdx=-1;$audioEl.pause();
-    if(hist.length){activeIdx=0;showResult(hist[0])}
-    else{$resultCard.style.display='none'}
-  }else if(activeIdx>idx){activeIdx--}
-  renderHistory();
-}
-
-$clearAllBtn.addEventListener('click',()=>{
-  if(!hist.length)return;
-  hist.forEach(h=>{if(h._audioUrl)URL.revokeObjectURL(h._audioUrl)});
-  hist=[];activeIdx=-1;$audioEl.pause();
-  $resultCard.style.display='none';renderHistory();
-  toast('History cleared','success');
-});
-
-// ── Post-Processing ────────────────────────────────────────────────────
+// ── Post-Processing ─────────────────────────────────────────────────────
 let ppAction=null;
 let ppLanguages=[];
 let ppLatestResult='';
 
-// Load languages from text-api for the translate dropdown
 async function ppLoadLanguages(){
   try{
     const r=await fetch(`${TEXT_API}/languages`);
@@ -725,7 +931,7 @@ async function ppRun(){
   if(!ppAction||!latestText)return;
   const runBtn=$('ppRunBtn');
   runBtn.disabled=true;
-  runBtn.innerHTML='<span class="pp-spinner"></span> Processing …';
+  runBtn.innerHTML='<span class="pp-spinner"></span> Processing \u2026';
   $('ppLoading').style.display='none';
   $('ppResultArea').style.display='none';
 
@@ -740,7 +946,7 @@ async function ppRun(){
       });
       if(!r.ok){let m=`HTTP ${r.status}`;try{const j=await r.json();m=j.detail||m}catch{}throw new Error(m)}
       const d=await r.json();
-      result={text:d.translated_text,label:'Translate',meta:`${d.source_language_name} → ${d.target_language_name} · ${d.duration_processing}s`};
+      result={text:d.translated_text,label:'Translate',meta:`${d.source_language_name} \u2192 ${d.target_language_name} \u00b7 ${d.duration_processing}s`};
     }else{
       const body={text:latestText,action:ppAction};
       if(ppAction==='custom')body.custom_prompt=$('ppCustomPrompt').value;
@@ -775,11 +981,264 @@ function ppCopyResult(){
   });
 }
 
-// ── Utilities ───────────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════════════
+//  TRANSLATE TAB
+// ══════════════════════════════════════════════════════════════════════════
+
+// ── Load languages ───────────────────────────────────────────────────────
+async function tlLoadLanguages(){
+  try{
+    const r=await fetch(`${TEXT_API}/languages`);
+    if(!r.ok)return;
+    const d=await r.json();tlLanguages=d.languages;
+    const srcOpts=tlLanguages.map(l=>`<option value="${l.code}">${l.name}</option>`).join('');
+    $srcLang.innerHTML=`<option value="auto" selected>Auto-detect</option>`+srcOpts;
+    $tgtLang.innerHTML=srcOpts;
+    $tgtLang.value='en';
+  }catch{}
+}
+tlLoadLanguages();
+
+// ── Char count + auto-detect ─────────────────────────────────────────────
+$srcText.addEventListener('input',()=>{
+  const len=$srcText.value.length;
+  $charCount.textContent=`${len.toLocaleString()} / ${MAX_CHARS.toLocaleString()}`;
+  $translateBtn.disabled=len===0||isTranslating;
+
+  clearTimeout(detectTimer);
+  if(len>10){
+    detectTimer=setTimeout(()=>detectLanguage($srcText.value),500);
+  }else{
+    $detectedLang.style.display='none';
+  }
+});
+
+async function detectLanguage(text){
+  if($srcLang.value!=='auto')return;
+  try{
+    const r=await fetch(`${TEXT_API}/detect`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({text:text.slice(0,500)})
+    });
+    if(!r.ok)return;
+    const d=await r.json();
+    if(d.language_code!=='unknown'){
+      $detectedLang.textContent=d.language_name;
+      $detectedLang.style.display='';
+    }
+  }catch{}
+}
+
+// ── Swap languages ───────────────────────────────────────────────────────
+$swapBtn.addEventListener('click',()=>{
+  const src=$srcLang.value;
+  const tgt=$tgtLang.value;
+  if(src==='auto')return;
+
+  $srcLang.value=tgt;
+  $tgtLang.value=src;
+
+  if(lastTranslatedText){
+    const oldSrc=$srcText.value;
+    $srcText.value=lastTranslatedText;
+    $tgtResult.textContent=oldSrc;
+    $tgtResult.className='result-area';
+    lastTranslatedText=oldSrc;
+    $srcText.dispatchEvent(new Event('input'));
+  }
+});
+
+// ── Translate ────────────────────────────────────────────────────────────
+$translateBtn.addEventListener('click',doTranslate);
+$srcText.addEventListener('keydown',e=>{
+  if(e.ctrlKey&&e.key==='Enter')doTranslate();
+});
+
+async function doTranslate(){
+  const text=$srcText.value.trim();
+  if(!text||isTranslating)return;
+
+  isTranslating=true;
+  $translateBtn.disabled=true;
+  $translateBtn.innerHTML='<span class="btn-spinner"></span> Translating \u2026';
+  $tgtResult.textContent='';
+  $tgtResult.className='result-area empty';
+  $tlCopyBtn.style.display='none';
+  $metaBar.innerHTML='';
+  $tlResultMeta.textContent='';
+
+  try{
+    const body={
+      text,
+      target_language:$tgtLang.value,
+    };
+    if($srcLang.value!=='auto')body.source_language=$srcLang.value;
+
+    const r=await fetch(`${TEXT_API}/translate`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(body)
+    });
+    if(!r.ok){
+      let msg=`HTTP ${r.status}`;
+      try{const j=await r.json();msg=j.detail||msg}catch{}
+      throw new Error(msg);
+    }
+    const d=await r.json();
+    lastTranslatedText=d.translated_text;
+
+    $tgtResult.textContent=d.translated_text;
+    $tgtResult.className='result-area';
+    $tlCopyBtn.style.display='';
+    $tlResultMeta.textContent=`${d.duration_processing}s`;
+
+    $metaBar.innerHTML=[
+      `<span>Source: ${d.source_language_name} (${d.source_language})</span>`,
+      `<span>Target: ${d.target_language_name}</span>`,
+      `<span>Processing: ${d.duration_processing}s</span>`,
+    ].join('');
+
+    tlHist.unshift({
+      srcText:text.slice(0,200),
+      tgtText:d.translated_text.slice(0,200),
+      srcLang:d.source_language_name,
+      tgtLang:d.target_language_name,
+      srcLangCode:d.source_language,
+      tgtLangCode:d.target_language,
+      time:d.duration_processing,
+      fullSrc:text,
+      fullTgt:d.translated_text,
+    });
+    tlActiveIdx=0;
+    renderHistory();
+  }catch(e){
+    toast(`Translation error: ${e.message}`);
+  }finally{
+    isTranslating=false;
+    $translateBtn.disabled=$srcText.value.length===0;
+    $translateBtn.innerHTML=`
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 8l4 4-4 4"/><line x1="12" y1="4" x2="12" y2="20" opacity=".3"/><path d="M15 4h2a2 2 0 0 1 2 2v1"/><path d="M15 20h2a2 2 0 0 0 2-2v-1"/></svg>
+      Translate`;
+  }
+}
+
+// ── Copy (Translate) ─────────────────────────────────────────────────────
+$tlCopyBtn.addEventListener('click',()=>{
+  navigator.clipboard.writeText(lastTranslatedText).then(()=>{
+    const l=$tlCopyBtn.querySelector('.copy-label');
+    $tlCopyBtn.classList.add('copied');l.textContent='Copied!';
+    setTimeout(()=>{$tlCopyBtn.classList.remove('copied');l.textContent='Copy'},1500);
+  });
+});
+
+// ══════════════════════════════════════════════════════════════════════════
+//  SHARED HISTORY (switches per tab)
+// ══════════════════════════════════════════════════════════════════════════
+function renderHistory(){
+  const hist=activeTab==='transcribe'?trHist:tlHist;
+  const idx=activeTab==='transcribe'?trActiveIdx:tlActiveIdx;
+
+  if(!hist.length){
+    $historyEmpty.style.display='';
+    $historyEmpty.textContent=activeTab==='transcribe'?'No transcriptions yet.':'No translations yet.';
+    $historyList.innerHTML='';$historyList.appendChild($historyEmpty);
+    return;
+  }
+  $historyEmpty.style.display='none';
+
+  if(activeTab==='transcribe'){
+    $historyList.innerHTML=hist.map((h,i)=>`
+      <div class="history-item${i===idx?' active':''}" onclick="selectTrHistory(${i})">
+        <button class="h-delete" onclick="event.stopPropagation();deleteTrHistory(${i})" title="Delete">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+        <div class="h-name">${esc(h._fileName||h.filename||'Recording')}</div>
+        <div class="h-meta">${h.language?.toUpperCase()||''} \u00b7 ${fmtDur(h.duration_audio)} \u00b7 ${h.duration_processing?.toFixed(1)}s</div>
+        <div class="h-preview">${esc(h.text||'')}</div>
+      </div>
+    `).join('');
+  }else{
+    $historyList.innerHTML=hist.map((h,i)=>`
+      <div class="history-item${i===idx?' active':''}" onclick="selectTlHistory(${i})">
+        <button class="h-delete" onclick="event.stopPropagation();deleteTlHistory(${i})" title="Delete">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+        <div class="h-name">${esc(h.srcLang)} \u2192 ${esc(h.tgtLang)}</div>
+        <div class="h-meta">${h.time}s</div>
+        <div class="h-preview">${esc(h.srcText)}</div>
+      </div>
+    `).join('');
+  }
+}
+
+// ── Transcribe history actions ───────────────────────────────────────────
+function selectTrHistory(idx){
+  $audioEl.pause();trActiveIdx=idx;
+  $resultCard.style.display='';$transcribing.style.display='none';
+  $progressBar.className='progress-bar';$progressBar.style.width='0';
+  showResult(trHist[idx]);renderHistory();
+}
+
+function deleteTrHistory(idx){
+  if(trHist[idx]._audioUrl)URL.revokeObjectURL(trHist[idx]._audioUrl);
+  trHist.splice(idx,1);
+  if(trActiveIdx===idx){
+    trActiveIdx=-1;$audioEl.pause();
+    if(trHist.length){trActiveIdx=0;showResult(trHist[0])}
+    else{$resultCard.style.display='none';$('ppCard').style.display='none'}
+  }else if(trActiveIdx>idx){trActiveIdx--}
+  renderHistory();
+}
+
+// ── Translate history actions ────────────────────────────────────────────
+function selectTlHistory(idx){
+  tlActiveIdx=idx;const h=tlHist[idx];
+  $srcText.value=h.fullSrc;
+  $tgtResult.textContent=h.fullTgt;
+  $tgtResult.className='result-area';
+  lastTranslatedText=h.fullTgt;
+  $tlCopyBtn.style.display='';
+  if(h.srcLangCode)$srcLang.value=h.srcLangCode;
+  if(h.tgtLangCode)$tgtLang.value=h.tgtLangCode;
+  $srcText.dispatchEvent(new Event('input'));
+  $metaBar.innerHTML=[
+    `<span>Source: ${h.srcLang}</span>`,
+    `<span>Target: ${h.tgtLang}</span>`,
+    `<span>Processing: ${h.time}s</span>`,
+  ].join('');
+  renderHistory();
+}
+
+function deleteTlHistory(idx){
+  tlHist.splice(idx,1);
+  if(tlActiveIdx===idx){tlActiveIdx=-1}
+  else if(tlActiveIdx>idx){tlActiveIdx--}
+  renderHistory();
+}
+
+// ── Clear all ────────────────────────────────────────────────────────────
+$clearAllBtn.addEventListener('click',()=>{
+  if(activeTab==='transcribe'){
+    if(!trHist.length)return;
+    trHist.forEach(h=>{if(h._audioUrl)URL.revokeObjectURL(h._audioUrl)});
+    trHist=[];trActiveIdx=-1;$audioEl.pause();
+    $resultCard.style.display='none';$('ppCard').style.display='none';
+  }else{
+    if(!tlHist.length)return;
+    tlHist=[];tlActiveIdx=-1;
+  }
+  renderHistory();
+  toast('History cleared','success');
+});
+
+// ══════════════════════════════════════════════════════════════════════════
+//  UTILITIES
+// ══════════════════════════════════════════════════════════════════════════
 function uid(){return Math.random().toString(36).slice(2,10)}
 function ts(){return new Date().toISOString().replace(/[:.]/g,'-').slice(0,19)}
 function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML}
-function fmtDur(sec){if(!sec)return'–';const m=Math.floor(sec/60),s=Math.round(sec%60);return m>0?`${m}m ${s}s`:`${s}s`}
+function fmtDur(sec){if(!sec)return'\u2013';const m=Math.floor(sec/60),s=Math.round(sec%60);return m>0?`${m}m ${s}s`:`${s}s`}
 function fmtTime(sec){if(!sec||isNaN(sec))return'0:00';return`${Math.floor(sec/60)}:${String(Math.floor(sec%60)).padStart(2,'0')}`}
 </script>
 </body>

@@ -1,6 +1,6 @@
 @echo off
 echo ============================================
-echo   Starting Voice-to-Text
+echo   Starting LangFlow
 echo ============================================
 echo.
 
@@ -8,7 +8,7 @@ docker-compose up -d --build
 
 echo.
 echo ============================================
-echo   Voice-to-Text is starting...
+echo   LangFlow is starting...
 echo.
 echo   Open in your browser:
 echo   http://localhost:1234

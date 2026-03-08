@@ -1,6 +1,6 @@
 @echo off
 echo ============================================
-echo   Stopping Voice-to-Text
+echo   Stopping LangFlow
 echo ============================================
 echo.
 
@@ -8,7 +8,7 @@ docker-compose down
 
 echo.
 echo ============================================
-echo   Voice-to-Text stopped successfully.
+echo   LangFlow stopped successfully.
 echo ============================================
 echo.
 pause

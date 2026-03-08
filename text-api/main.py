@@ -209,7 +209,7 @@ async def lifespan(_app: FastAPI):
 
 # ── FastAPI App ──────────────────────────────────────────────────────────────
 
-app = FastAPI(title="Text API", version="1.0.0", lifespan=lifespan)
+app = FastAPI(title="LangFlow Text API", version="1.0.0", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,

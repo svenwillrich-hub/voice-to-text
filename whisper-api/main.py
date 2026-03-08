@@ -1,6 +1,6 @@
 """
-Voice-to-Text — Whisper Transcription API
-==========================================
+LangFlow — Whisper Transcription API
+======================================
 FastAPI service wrapping faster-whisper for high-performance local transcription.
 Supports all common audio formats including WhatsApp voice messages (.opus, .ogg).
 """
@@ -71,7 +71,7 @@ async def lifespan(app: FastAPI):
 # ── FastAPI App ──────────────────────────────────────────────────────────────
 
 app = FastAPI(
-    title="Voice-to-Text Whisper API",
+    title="LangFlow Whisper API",
     version="1.0.0",
     lifespan=lifespan,
 )

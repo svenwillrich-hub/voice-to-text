@@ -1,20 +1,22 @@
-# Voice-to-Text + Text Translator
+# LangFlow
 
-Self-hosted audio transcription and text translation powered by local AI models. No data leaves your server. No API keys. Fully offline.
+Transform language, any direction. Transcribe speech to text and translate between languages — all in one place. Fast, simple, and built to grow with your needs.
+
+Self-hosted, powered by local AI models. No data leaves your server. No API keys. Fully offline.
 
 ## Features
 
 | Feature | Description | Model |
 |---------|-------------|-------|
-| **Voice-to-Text** | Record audio or upload files, get instant transcriptions | [faster-whisper](https://github.com/SYSTRAN/faster-whisper) (`large-v3-turbo`) |
+| **Transcribe** | Record audio or upload files, get instant transcriptions | [faster-whisper](https://github.com/SYSTRAN/faster-whisper) (`large-v3-turbo`) |
 | **Post-Processing** | Summarize, optimize, or transform transcribed text | [Gemma 3 12B](https://ai.google.dev/gemma) via Ollama |
-| **Text Translation** | Translate text between 55 languages | [TranslateGemma 12B](https://blog.google/technology/developers/translategemma/) via Ollama |
+| **Translate** | Translate text between 55 languages | [TranslateGemma 12B](https://blog.google/technology/developers/translategemma/) via Ollama |
 
 ## Architecture
 
 ```
                                 ┌──────────────────────┐
- :1234  Voice-to-Text UI ─────▶│  nginx (frontend)    │
+ :1234  LangFlow UI ──────────▶│  nginx (frontend)    │
                                 │  /api/*  → whisper   │
                                 │  /text-api/* → text  │
                                 └──────────────────────┘
@@ -27,32 +29,26 @@ Self-hosted audio transcription and text translation powered by local AI models.
           │  faster-whisper  │  │  Translation &     │◀─│              │
           │  :8000           │  │  Processing :5000  │  │  :11434      │
           └──────────────────┘  └──────────────────┘  └──────────────┘
-
-                                ┌──────────────────────┐
- :1235  Text Translator UI ───▶│  nginx (translator)  │
-                                │  /api/* → text-api   │
-                                └──────────────────────┘
 ```
 
 ### Services
 
 | Service | Port | Purpose |
 |---------|------|---------|
-| `web-frontend` | 1234 | Voice-to-Text web UI |
-| `web-translator` | 1235 | Text Translator web UI |
+| `web-frontend` | 1234 | LangFlow web UI (Transcribe + Translate) |
 | `whisper-api` | 8000 | Audio transcription API |
 | `text-api` | 5000 | Translation & text processing API |
 | `ollama` | 11434 | Local LLM runtime |
 
 ## Models & Why They Were Chosen
 
-### faster-whisper `large-v3-turbo` (Voice-to-Text)
+### faster-whisper `large-v3-turbo` (Transcription)
 
 - **What**: OpenAI Whisper model optimized with CTranslate2 for 4x faster inference
 - **Why**: Best speed/quality trade-off for transcription. The `large-v3-turbo` variant (~1.5B parameters) delivers near `large-v3` quality at significantly faster speeds. Supports 99 languages with automatic language detection.
 - **Size**: ~1.5 GB download, runs on CPU (int8) or GPU (float16)
 
-### TranslateGemma 12B (Text Translation)
+### TranslateGemma 12B (Translation)
 
 - **What**: Google's purpose-built translation model based on Gemma 3, released January 2026
 - **Why**: Specifically fine-tuned for translation rather than being a general-purpose LLM. The 12B model outperforms the base Gemma 3 27B on translation benchmarks (MetricX 3.60 vs 4.04 on WMT24++) while using half the parameters. Supports 55 languages with near-DeepL quality. Runs on consumer GPUs with 8+ GB VRAM using int4 quantization.
@@ -77,7 +73,7 @@ Self-hosted audio transcription and text translation powered by local AI models.
 ### 1. Clone and configure
 
 ```bash
-git clone <repo-url> && cd voice-to-text
+git clone <repo-url> && cd langflow
 cp .env.example .env
 # Edit .env if needed (model sizes, ports, etc.)
 ```
@@ -90,10 +86,11 @@ docker compose up --build
 
 On first start, Ollama will automatically download TranslateGemma 12B (~8 GB) and Gemma 3 12B (~8 GB). The Whisper model (~1.5 GB) also downloads on first run. This initial download may take 10-30 minutes depending on your connection.
 
-### 3. Access the UIs
+### 3. Open LangFlow
 
-- **Voice-to-Text**: http://localhost:1234
-- **Text Translator**: http://localhost:1235
+http://localhost:1234
+
+Use the **Transcribe** tab to record or upload audio, and the **Translate** tab for text translation.
 
 ### GPU Support
 
@@ -107,7 +104,7 @@ Requires [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-nat
 
 All settings via environment variables (see `.env.example`):
 
-### Whisper (Voice-to-Text)
+### Whisper (Transcription)
 
 | Variable | Default | Description |
 |---|---|---|
@@ -132,8 +129,7 @@ All settings via environment variables (see `.env.example`):
 | `API_PORT` | `8000` | Whisper API |
 | `TEXT_API_PORT` | `5000` | Text API |
 | `OLLAMA_PORT` | `11434` | Ollama LLM runtime |
-| `WEB_PORT` | `1234` | Voice-to-Text frontend |
-| `TRANSLATOR_PORT` | `1235` | Text Translator frontend |
+| `WEB_PORT` | `1234` | LangFlow frontend |
 
 ## Using Lower-Resource Models
 
@@ -162,9 +158,9 @@ PROCESSING_MODEL=gemma3:4b
 - `POST /translate` — Translate text between languages
 - `POST /process` — Summarize, optimize, or apply custom prompt to text
 
-## Voice-to-Text Post-Processing
+## Post-Processing
 
-After transcribing audio, the Voice-to-Text UI offers four post-processing actions:
+After transcribing audio, the Transcribe tab offers four post-processing actions:
 
 1. **Summarize** — Get a concise summary of the transcription
 2. **Translate** — Translate the transcribed text to another language
